@@ -155,6 +155,20 @@ static int ReadStream(FILE* stream, const CatOptions* options,
       state->line_start = 0;
     }
 
+    if (character == '\r' && options->e && !options->v) {
+      int next_character = fgetc(stream);
+      if (next_character == '\n') {
+        fputs("^M", stdout);
+        character = '\n';
+      } else {
+        putchar('\r');
+        if (next_character != EOF) {
+          ungetc(next_character, stream);
+        }
+        continue;
+      }
+    }
+
     if (character == '\n') {
       if (options->e) {
         putchar('$');
